@@ -1,2 +1,4 @@
 # tarea1-algorithms
-# tarea1-algorithms
+Benjamín Camus Valdés
+202173072-9
+
