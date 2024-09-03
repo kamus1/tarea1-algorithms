@@ -8,29 +8,35 @@
 using namespace std;
 
 int main(){
-    string nombreArchivo = "datasets/random_dataset.txt";
-    ifstream archivo(nombreArchivo.c_str());
+    vector<string> nombres_archivos = {
+        "datasets/random_dataset.txt",
+        "datasets/partially_sorted_dataset.txt",
+        "datasets/semisorted_dataset.txt",
+        "datasets/unique_random_dataset.txt",
+    };
 
-    vector<int> listado;
-    
-    string num;
-    //leer y guardar numeros del .txt
-    while (getline(archivo, num, ' ')) {
-        if (!num.empty()) listado.push_back(stoi(num));
+    cout << "Merge Sort" << endl;
+    for( string nombreArchivo : nombres_archivos){
+        ifstream archivo(nombreArchivo.c_str());
+
+        vector<int> listado;
+        
+        string num;
+        //leer y guardar numeros del .txt
+        while (getline(archivo, num, ' ')) {
+            if (!num.empty()) listado.push_back(stoi(num));
+        }
+
+
+        auto start = chrono::high_resolution_clock::now();
+        sort(listado.begin(), listado.end());
+        auto end = chrono::high_resolution_clock::now();
+        
+        chrono::duration<double, milli> elapsed = end - start;
+            cout << "Time: " << elapsed.count() << " ms" << " | File: " << nombreArchivo << endl;
+
+
+        //for (int e: listado){cout << e << ' ';} cout << endl;
     }
-
-
-    auto start = chrono::high_resolution_clock::now();
-    sort(listado.begin(), listado.end());
-    auto end = chrono::high_resolution_clock::now();
-    
-    chrono::duration<double, milli> elapsed = end - start;
-    cout << "time: " << elapsed.count() << " ms" << endl;
-
-    //for (int e: listado){
-    //    cout << e << ' ';
-    //}
-    //cout << endl;
-
     return 0;
 }

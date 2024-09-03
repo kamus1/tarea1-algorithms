@@ -6,6 +6,7 @@
 #include <fstream>
 #include <set>
 #include <filesystem>
+#include <random> //para std::shuffle
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -62,6 +63,13 @@ vector<int> gen_unique_random_dataset(int size) {
     }
 
     data.assign(unique_numbers.begin(), unique_numbers.end());
+
+    //desordenar el vector para que los números sean únicos pero no estén ordenados
+    //ya que el set los almacena ordenadamente
+    random_device rd;
+    mt19937 g(rd());
+    shuffle(data.begin(), data.end(), g);
+
     return data;
 }
 
@@ -101,6 +109,8 @@ int main() {
     dataset_to_file(dataset_semi_sorted, "semisorted_dataset.txt");
     dataset_to_file(dataset_partially_sorted, "partially_sorted_dataset.txt");
     dataset_to_file(dataset_unique_random, "unique_random_dataset.txt");
+
+    cout << "Datasets creados correctamente" << "\n";
 
     return 0;
 }

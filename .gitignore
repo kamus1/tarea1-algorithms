@@ -1,8 +1,10 @@
 generate_datasets
 selection_sort
 merge_sort
-quick_sort
+quicksort
 fun_sort
 myold_merge_sort
 cpp_fun_sort
 tempCodeRunnerFile.cpp
+cubic_traditional
+generate_matrix

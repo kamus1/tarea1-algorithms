@@ -26,6 +26,8 @@ void merge(vector<int>& vec, int left, int mid, int right){
 
     // hacer el merge de los vectores, combinarlos de vuelta en el vector original
     while (index_1 < n1 && index_2 < n2) {
+    //va comparando los valores de los 2 vectores al mismo tiempo y el menor de los 2 valores lo cambia en el vec original
+    //y aumenta el index del vecotor correspondiente, de cualquier forma aumenta la posicion k que es donde va colocando los valores de los vec comparados
         if (leftVec[index_1] <= rightVec[index_2]) {
             vec[k] = leftVec[index_1];
             index_1++;
@@ -36,6 +38,7 @@ void merge(vector<int>& vec, int left, int mid, int right){
         k++;
     }
 
+    //solo hace uno de los dos while siguientes
     //agregar el resto de leftVec (si es que queda algún elemento)
     while (index_1 < n1) {
         vec[k] = leftVec[index_1];
@@ -71,27 +74,33 @@ void merge_sort(vector<int>& lista_nums, int begin, int end) {
 
 
 int main(){
-    string nombreArchivo = "datasets/random_dataset.txt";
-    ifstream archivo(nombreArchivo.c_str());
+    vector<string> nombres_archivos = {
+        "datasets/random_dataset.txt",
+        "datasets/partially_sorted_dataset.txt",
+        "datasets/semisorted_dataset.txt",
+        "datasets/unique_random_dataset.txt",
+    };
 
-    vector<int> listado;
-    string num;
-    //leer y guardar numeros del .txt
-    while (getline(archivo, num, ' ')) {
-        if (!num.empty()) listado.push_back(stoi(num));
+    cout << "Merge Sort" << endl;
+    for( string nombreArchivo : nombres_archivos){
+        ifstream archivo(nombreArchivo.c_str());
+
+        vector<int> listado;
+        string num;
+        //leer y guardar numeros del .txt
+        while (getline(archivo, num, ' ')) {
+            if (!num.empty()) listado.push_back(stoi(num));
+        }
+        
+        int n = listado.size();
+        auto start = chrono::high_resolution_clock::now();
+        merge_sort(listado, 0, n -1);
+        auto end = chrono::high_resolution_clock::now();
+
+        chrono::duration<double, milli> elapsed = end - start;
+        cout << "Time: " << elapsed.count() << " ms" << " | File: " << nombreArchivo << endl;
+
+        //for (int e: listado){cout << e << ' ';}cout << endl;
     }
-
-    auto start = chrono::high_resolution_clock::now();
-    merge_sort(listado, 0, listado.size() -1);
-    auto end = chrono::high_resolution_clock::now();
-
-    chrono::duration<double, milli> elapsed = end - start;
-    cout << "time: " << elapsed.count() << " ms" << endl;
-
-    for (int e: listado){
-        cout << e << ' ';
-    }
-    cout << endl;
-
     return 0;
 }
