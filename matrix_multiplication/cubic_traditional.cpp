@@ -46,8 +46,8 @@ vector<vector<int>> multiplicar_matrices(
 
     for (int row = 0; row < filas_A; ++row) {
         for (int col = 0; col < columnas_B; ++col) {
-            for (int inner = 0; inner < columnas_A; ++inner) {
-                producto[row][col] += aMatrix[row][inner] * bMatrix[inner][col];
+            for (int valor = 0; valor < columnas_A; ++valor) {
+                producto[row][col] += aMatrix[row][valor] * bMatrix[valor][col];
             }
         }
     }
@@ -72,7 +72,13 @@ int main() {
 
     int filas_A = matriz_1.size();
     int columnas_A = matriz_1[0].size();
+    int filas_B = matriz_2.size();
     int columnas_B = matriz_2[0].size();
+
+    if (columnas_A != filas_B) {
+        cerr << "Las dimensiones no compatibles para multiplicación." << endl;
+        return 1;
+    }
 
 
     auto start = chrono::high_resolution_clock::now();

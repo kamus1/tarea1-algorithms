@@ -20,14 +20,14 @@ vector<vector<int>> leer_matriz(const string& archivoEntrada) {
     
     while (getline(file, linea)) { //leer por linea
         istringstream iss(linea);
-        vector<int> fila;
+        vector<int> fila; 
         int numero;
         
         while (iss >> numero) {
             fila.push_back(numero);
         }
         
-        matriz.push_back(fila);
+        matriz.push_back(fila);// linea es una fila
     }
 
     file.close();
@@ -39,23 +39,26 @@ vector<vector<int>> multiplicar_matrices_optimizado(
     const vector<vector<int>>& aMatrix,
     const vector<vector<int>>& bMatrix,
     int filas_A, 
-    int columnas_A
+    int columnas_A,
+    int columnas_B //considerar las columnas de B (caso cuando las matrices no son de iguales tamaños)
     ) {
 
-    //transponer la segunda matriz
-    vector<vector<int>> bMatrix_T(columnas_A, vector<int>(filas_A));
-    for (int i = 0; i < filas_A; ++i) {
-        for (int j = 0; j < columnas_A; ++j) {
+    //transponer la segunda matriz considerando dimentsiones de columnas_a y columnas de b
+    vector<vector<int>> bMatrix_T(columnas_B, vector<int>(columnas_A));
+    for (int i = 0; i < columnas_A; ++i) {
+        for (int j = 0; j < columnas_B; ++j) {
             bMatrix_T[j][i] = bMatrix[i][j];
         }
     }
 
-    vector<vector<int>> producto(filas_A, vector<int>(columnas_A, 0));
+    //la matriz de producto con dimensiones n x m
+    //[fila_a][columna_a] * [fila_b][columna_b] --> resultante de la multiplicacion es [fila_a][columna_b]
+    vector<vector<int>> producto(filas_A, vector<int>(columnas_B, 0)); //inicializar con ceros con tamaño de la columna b
 
     for (int row = 0; row < filas_A; ++row) {
-        for (int col = 0; col < columnas_A; ++col) {
-            for (int inner = 0; inner < columnas_A; ++inner) {
-                producto[row][col] += aMatrix[row][inner] * bMatrix_T[col][inner];
+        for (int col = 0; col < columnas_B; ++col) {
+            for (int valor = 0; valor < columnas_A; ++valor) {
+                producto[row][col] += aMatrix[row][valor] * bMatrix_T[col][valor]; // solo este ultimo cambia, en el normal es [valor][col]
             }
         }
     }
@@ -79,11 +82,17 @@ int main() {
 
     int filas_A = matriz_1.size();
     int columnas_A = matriz_1[0].size();
-    //int columnas_B = matriz_2[0].size();
+    int filas_B = matriz_2.size();
+    int columnas_B = matriz_2[0].size();
+
+    if (columnas_A != filas_B) {
+        cerr << "Las dimensiones no compatibles para multiplicación." << endl;
+        return 1;
+    }
 
 
     auto start = chrono::high_resolution_clock::now();
-    vector<vector<int>> producto = multiplicar_matrices_optimizado(matriz_1, matriz_2,filas_A, columnas_A);
+    vector<vector<int>> producto = multiplicar_matrices_optimizado(matriz_1, matriz_2,filas_A, columnas_A, columnas_B);
     auto end = chrono::high_resolution_clock::now();
 
     chrono::duration<double, milli> elapsed = end - start;

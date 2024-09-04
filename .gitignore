@@ -7,4 +7,6 @@ myold_merge_sort
 cpp_fun_sort
 tempCodeRunnerFile.cpp
 cubic_traditional
+cubic_optimizated
 generate_matrix
+strassen_algorithm

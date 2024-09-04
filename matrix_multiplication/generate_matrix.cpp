@@ -47,17 +47,25 @@ void guardar_matriz_en_archivo(const vector<vector<int>>& matriz, const string& 
 int main() {
     srand(time(0));
 
-    //parámetros de la matriz
-    int filas = 400;
-    int columnas = 400;
+    //parámetros de la matriz 1
+    int filas = 200;
+    int columnas = 200;
     int rango_min = 1;
-    int rango_max = 1000;
+    int rango_max = 10;
     string nombre_archivo_1 = "matriz_1.txt";
-    string nombre_archivo_2 = "matriz_2.txt";
+
 
     //gen matriz 1
     auto matriz = generar_matriz(filas, columnas, rango_min, rango_max);
     guardar_matriz_en_archivo(matriz, nombre_archivo_1);
+
+
+    //parámetros de la matriz 2
+    filas = 200;
+    columnas = 200;
+    rango_min = 1;
+    rango_max = 10;
+    string nombre_archivo_2 = "matriz_2.txt";
 
     //gen matriz 2
     auto matriz_2 = generar_matriz(filas, columnas, rango_min, rango_max);
