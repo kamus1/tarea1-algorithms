@@ -1,246 +1,368 @@
 #include <iostream>
-#include <fstream>
 #include <vector>
+#include <cmath>
+#include <fstream>
 #include <sstream>
 #include <chrono>
-#include <cmath>
 
 using namespace std;
 
-//función para ajustar el tamaño de la matriz para que sea del tipo 2^n
-vector<vector<int>> ajustar_matriz(const vector<vector<int>>& matriz) {
-    int filas = matriz.size();
-    int columnas = matriz[0].size();
-    
-    //se busaca la siguiente potencia de 2 más grande
-    int max_dim = max(filas, columnas);
-    int nueva_dim = pow(2, ceil(log2(max_dim)));
-    
-	// si la matriz ya es del tamaño correcto, devolverla sin cambios
-    if (nueva_dim == max_dim) {
-        return matriz;
-    }
-    
-    //crear la nueva matriz que va a tneer tamaño nueva_dim x nueva_dim y llenarla con ceros
-    vector<vector<int>> matriz_ajustada(nueva_dim, vector<int>(nueva_dim, 0));
-    
-    // y copiar los elementos de la matriz original a la nueva matriz ajustada
-    for (int i = 0; i < filas; i++) {
-        for (int j = 0; j < columnas; j++) {
-            matriz_ajustada[i][j] = matriz[i][j];
-        }
-    }
-    
-    return matriz_ajustada;
-}
+//---------Tamaño de las hojas---------//
+int leafsize = 16;
+//-------------------------------------//
 
-
-//esta funcion lee los datos del archivo .txt de las matrices generaras
+//funcion que lee las matrices de los archivos .txt 
+//cada linea del archivo representa una fila de la matriz.
 vector<vector<int>> leer_matriz(const string& archivoEntrada) {
     ifstream file(archivoEntrada);
     if (!file.is_open()) {
         cerr << "No se pudo abrir el archivo" << endl;
         exit(1); //terminar si no se pude encontrar el archivo
     }
-
     vector<vector<int>> matriz;
     string linea;
-    
     while (getline(file, linea)) { //leer por linea
         istringstream iss(linea);
-        vector<int> fila;
+        vector<int> fila; 
         int numero;
-        
-        while (iss >> numero) {
-            fila.push_back(numero);
-        }
-        
-        matriz.push_back(fila);
+        while (iss >> numero) { fila.push_back(numero);}
+        matriz.push_back(fila);// linea es una fila
     }
-
     file.close();
     return matriz;
 }
 
-//funciones para la multiplicacion de matrices Metodo de Strassen
-vector<vector<int> >
-add_matrix(vector<vector<int> > matrix_A,
-           vector<vector<int> > matrix_B, int split_index,
-           int multiplier = 1)
-{
-    for (auto i = 0; i < split_index; i++)
-        for (auto j = 0; j < split_index; j++)
-            matrix_A[i][j]
-                = matrix_A[i][j]
-                  + (multiplier * matrix_B[i][j]);
-    return matrix_A;
-}
- 
-vector<vector<int> >
-multiply_matrix(
-	vector<vector<int> > matrix_A,
-    vector<vector<int> > matrix_B
-	)
-{
-    int col_1 = matrix_A[0].size();
-    int row_1 = matrix_A.size();
-    int col_2 = matrix_B[0].size();
-    int row_2 = matrix_B.size();
- 
-    if (col_1 != row_2) {
-		cout << "ERROR: El numero de las columas en la matriz A debe de ser igual al numero de filas en la matriz b" << endl;
-        return {};
-    }
- 
-    vector<int> result_matrix_row(col_2, 0);
-    vector<vector<int> > result_matrix(row_1,result_matrix_row);
- 
-    if (col_1 == 1)
-        result_matrix[0][0]
-            = matrix_A[0][0] * matrix_B[0][0];
-    else {
-        int split_index = col_1 / 2;
- 
-        vector<int> row_vector(split_index, 0);
- 
-        vector<vector<int> > a00(split_index, row_vector);
-        vector<vector<int> > a01(split_index, row_vector);
-        vector<vector<int> > a10(split_index, row_vector);
-        vector<vector<int> > a11(split_index, row_vector);
-        vector<vector<int> > b00(split_index, row_vector);
-        vector<vector<int> > b01(split_index, row_vector);
-        vector<vector<int> > b10(split_index, row_vector);
-        vector<vector<int> > b11(split_index, row_vector);
- 
-        for (auto i = 0; i < split_index; i++)
-            for (auto j = 0; j < split_index; j++) {
-                a00[i][j] = matrix_A[i][j];
-                a01[i][j] = matrix_A[i][j + split_index];
-                a10[i][j] = matrix_A[split_index + i][j];
-                a11[i][j] = matrix_A[i + split_index]
-                                    [j + split_index];
-                b00[i][j] = matrix_B[i][j];
-                b01[i][j] = matrix_B[i][j + split_index];
-                b10[i][j] = matrix_B[split_index + i][j];
-                b11[i][j] = matrix_B[i + split_index]
-                                    [j + split_index];
+
+
+//aqui solo se realizan declaraciones de funciones
+void strassen(vector<vector<int>>& A, vector<vector<int>>& B, vector<vector<int>>& C, unsigned int n);
+unsigned int nextPowerOfTwo(int n);
+void strassenR(vector<vector<int>>& A, vector<vector<int>>& B, vector<vector<int>>& C, int tam);
+void suma(vector<vector<int>>& A, vector<vector<int>>& B, vector<vector<int>>& C, int tam);
+void resta(vector<vector<int>>& A, vector<vector<int>>& B, vector<vector<int>>& C, int tam);
+void printMatrix(const vector<vector<int>>& matrix, int n);
+void leer(string filename, vector<vector<int>>& A, vector<vector<int>>& B);
+int getMatrixSize(string filename);
+void ikjalgorithm(const vector<vector<int>>& A, const vector<vector<int>>& B, vector<vector<int>>& C, int n);
+
+
+
+//ikjalgorithm es el algoritmo que realiza la multiplicación de matrices de manera tradicional.
+//solo se usa cuando el tamaño de la matriz es menor o igual a leafsize
+void ikjalgorithm(const vector<vector<int>>& A, const vector<vector<int>>& B, vector<vector<int>>& C, int n) {
+    for (int i = 0; i < n; i++) {
+        for (int k = 0; k < n; k++) {
+            for (int j = 0; j < n; j++) {
+                C[i][j] += A[i][k] * B[k][j];
             }
- 
-        vector<vector<int> > p(multiply_matrix(
-            a00, add_matrix(b01, b11, split_index, -1)));
-        vector<vector<int> > q(multiply_matrix(
-            add_matrix(a00, a01, split_index), b11));
-        vector<vector<int> > r(multiply_matrix(
-            add_matrix(a10, a11, split_index), b00));
-        vector<vector<int> > s(multiply_matrix(
-            a11, add_matrix(b10, b00, split_index, -1)));
-        vector<vector<int> > t(multiply_matrix(
-            add_matrix(a00, a11, split_index),
-            add_matrix(b00, b11, split_index)));
-        vector<vector<int> > u(multiply_matrix(
-            add_matrix(a01, a11, split_index, -1),
-            add_matrix(b10, b11, split_index)));
-        vector<vector<int> > v(multiply_matrix(
-            add_matrix(a00, a10, split_index, -1),
-            add_matrix(b00, b01, split_index)));
- 
-        vector<vector<int> > result_matrix_00(add_matrix(
-            add_matrix(add_matrix(t, s, split_index), u,
-                       split_index),
-            q, split_index, -1));
-        vector<vector<int> > result_matrix_01(
-            add_matrix(p, q, split_index));
-        vector<vector<int> > result_matrix_10(
-            add_matrix(r, s, split_index));
-        vector<vector<int> > result_matrix_11(add_matrix(
-            add_matrix(add_matrix(t, p, split_index), r,
-                       split_index, -1),
-            v, split_index, -1));
- 
-        for (auto i = 0; i < split_index; i++)
-            for (auto j = 0; j < split_index; j++) {
-                result_matrix[i][j]
-                    = result_matrix_00[i][j];
-                result_matrix[i][j + split_index]
-                    = result_matrix_01[i][j];
-                result_matrix[split_index + i][j]
-                    = result_matrix_10[i][j];
-                result_matrix[i + split_index]
-                             [j + split_index]
-                    = result_matrix_11[i][j];
-            }
- 
-        a00.clear();
-        a01.clear();
-        a10.clear();
-        a11.clear();
-        b00.clear();
-        b01.clear();
-        b10.clear();
-        b11.clear();
-        p.clear();
-        q.clear();
-        r.clear();
-        s.clear();
-        t.clear();
-        u.clear();
-        v.clear();
-        result_matrix_00.clear();
-        result_matrix_01.clear();
-        result_matrix_10.clear();
-        result_matrix_11.clear();
+        }
     }
-    return result_matrix;
 }
 
-//para ahorarse el codigo del print de la matriz
-void imprimir_matriz(const vector<vector<int>>& matriz) {
-    for (const auto& fila : matriz) {
-        for (int numero : fila) {
-            cout << numero << " ";
+//la funcion recursiva de strassen: divide las matrices A y B en submatrices de tamaño reducido A11, A12, ...
+void strassenR(vector<vector<int>>& A, vector<vector<int>>& B, vector<vector<int>>& C, int tam) {
+    if (tam <= leafsize) {
+        //primero se verifica el tamaño de las hojas para ejecutar el algortimo ikj
+        ikjalgorithm(A, B, C, tam);
+        return;
+
+    } else {
+        int newTam = tam / 2; //nuevo tamaño de las sub matrices
+        vector<int> inner(newTam); // se usa para inicializar las FILAS de las submatrices.
+        
+        //se definen al mismo tiempo todas las sub matrices y los producos P_i a calcular, así como los resultados
+        vector<vector<int>> A11(newTam, inner), //ej: esta linea crea una matriz A11 con newTam filas, y cada fila es una copia del vector inner. entonces A11 es una matriz de newTam x newTam donde cada elemento está inicializado en 0
+            A12(newTam, inner), //y lo mismo para las demas
+            A21(newTam, inner),
+            A22(newTam, inner),
+            B11(newTam, inner), 
+            B12(newTam, inner),
+            B21(newTam, inner),
+            B22(newTam, inner),
+            C11(newTam, inner),
+            C12(newTam, inner),
+            C21(newTam, inner),
+            C22(newTam, inner),
+            P1(newTam, inner),
+            P2(newTam, inner),
+            P3(newTam, inner),
+            P4(newTam, inner),
+            P5(newTam, inner),
+            P6(newTam, inner),
+            P7(newTam, inner),
+            aResult(newTam, inner),
+            bResult(newTam, inner);
+        
+        // Dividiendo las matrices en 4 submatrices
+        //se está dividiendo las matrices A y B en 4 submatrices mas pequeñas de tamaño newTam * newTam
+        for (int i = 0; i < newTam; i++) { //i del for recorre las FILAS de las submatrices desde 0 hasta newTam
+            for (int j = 0; j < newTam; j++) { // bucle for sobre las columnas j, que recorre las COLUMNAS de las submatrices de 0 hasta newTam
+                /*
+                A11 │ A12
+                ────┼────
+                A21 │ A22
+                */
+                A11[i][j] = A[i][j]; // elementos superiores-izquierdos de A que forman A11 
+                A12[i][j] = A[i][j + newTam]; // elementos superiores-derechos de A que forman A12 (por eso se suma newtam a j, para llegar al otro cuadrante)
+
+                A21[i][j] = A[i + newTam][j]; // elementos inferiores-izquierdos de A que forman A21
+                A22[i][j] = A[i + newTam][j + newTam]; //lementos inferiores-derechos de A que forman A22
+
+                //y se realiza lo mismo para B
+                B11[i][j] = B[i][j];
+                B12[i][j] = B[i][j + newTam];
+                B21[i][j] = B[i + newTam][j];
+                B22[i][j] = B[i + newTam][j + newTam];
+            }
+        }
+        
+
+        // a continuación se realizan los cálculos necesarios para aplicar el algoritmo de Strassen y obtener los siete productos intermedios de P1 a P7
+        
+        //----------------P1---------------------//
+        suma(A11, A22, aResult, newTam); // suma de las submatrices A11 + A22 y el resultado se guarda en aResult
+        suma(B11, B22, bResult, newTam); // suma de las submatrices B11 + B22 y el resultado se guarda en bResult
+
+        // llama recursivamente a strassenR para multiplicar las sumas obtenidas en los pasos anteriores, es decir:
+        //P1 = (A11 + A22) * (B11 + B22) Y almacena el resultado en P1
+        strassenR(aResult, bResult, P1, newTam); 
+        //---------------------------------------//
+        
+        //mismo procedimiento para los demas productos intermedios:
+        //----------------P2---------------------//
+        suma(A21, A22, aResult, newTam); 
+        //P2 =(A11 + A22) * B11
+        strassenR(aResult, B11, P2, newTam);
+        //---------------------------------------//
+
+
+        //----------------P3---------------------//
+        resta(B12, B22, bResult, newTam); // B12 - B22
+        // P3 = A11 * (B12 - B22)
+        strassenR(A11, bResult, P3, newTam);
+        //---------------------------------------//
+        
+
+        //----------------P4---------------------//
+        resta(B21, B11, bResult, newTam);
+        // P4 = A22 * (B21 - B11)
+        strassenR(A22, bResult, P4, newTam);
+        //---------------------------------------//
+
+
+        //----------------P5---------------------//
+        suma(A11, A12, aResult, newTam);
+        //P5 = (A11 + A12) * B22
+        strassenR(aResult, B22, P5, newTam);
+        //---------------------------------------//
+
+
+        //----------------P6---------------------//
+        resta(A21, A11, aResult, newTam);
+        suma(B11, B12, bResult, newTam);
+        //P6 =(A21 - A11) * (B11 + B12)
+        strassenR(aResult, bResult, P6, newTam);
+        //---------------------------------------//
+
+
+        //----------------P7---------------------//
+        resta(A12, A22, aResult, newTam);
+        suma(B21, B22, bResult, newTam);
+        //P7 = (A12 - A22) * (B21 + B22)
+        strassenR(aResult, bResult, P7, newTam);
+        //---------------------------------------//
+
+
+
+        // calculando C11, C12, C21, C22
+        //este bloque de código utiliza los productos intermedios P1 a P7 calculados previamente con el algoritmo de Strassen
+        //para ensamblar las submatrices C11, C12, C21, C22 que componen la matriz resultante
+        suma(P3, P5, C12, newTam); // C12 = P3 + P5
+        suma(P2, P4, C21, newTam); // C21 = P2 + P4
+
+        suma(P1, P4, aResult, newTam); // aResult = P1 + P4 (suma intermedia)
+        suma(aResult, P7, bResult, newTam); // bResult = aResult + P7
+        resta(bResult, P5, C11, newTam); // C11 = P1+P4+P7 - P5
+
+        suma(P1, P3, aResult, newTam); // aResult = P1 + P3 (suma intermedia)
+        suma(aResult, P6, bResult, newTam); // bResult = aResult + P6
+        resta(bResult, P2, C22, newTam); // C22 = P1+P3+P6 - P2
+
+        // agrupa las submatrices C11, C12, C21, C22 en la matriz completa C 
+        for (int i = 0; i < newTam; i++) {
+            for (int j = 0; j < newTam; j++) {
+                /*
+                matriz C:
+                C11 │ C12
+                ────┼────
+                C21 │ C22
+                */
+                C[i][j] = C11[i][j]; //C11  superior izquierda
+                C[i][j + newTam] = C12[i][j]; // C12 superior derecha
+
+                C[i + newTam][j] = C21[i][j]; //C21 inferior izquierda
+                C[i + newTam][j + newTam] = C22[i][j]; //C22 inferior derecha
+            }
+        }
+    }
+}
+
+
+
+//calcula la próxima potencia de 2, mayor o igual a un número dado
+//se utiliza para asegurar que las matrices involucradas en la multiplicación tengan un tamaño que sea una potencia de 2
+
+//se calcula el log_2(n), esto se redondea hacia arriba al entero mas cercano,
+// y pow calcula 2 elevado al valor del exponente calculado previamente. Esto devuelve la potencia de dos más cercana que es mayor o igual a n
+//ej pow(2, 3) = 2^3 = 8 que es la próxima potencia de dos mayor que 5
+unsigned int nextPowerOfTwo(int n) {
+    return pow(2, int(ceil(log2(n)))); 
+}
+
+//función principal que coordina la multiplicación de matrices utilizando el algoritmo de Strassen
+void strassen(vector<vector<int>>& A, vector<vector<int>>& B, vector<vector<int>>& C, unsigned int n) {
+    //aquí se calcula la siguiente potencia de dos mayor o igual al tamaño n de las matrices.
+    //esto asegura que las matrices A y B puedan ser divididas de manera uniforme en submatrices durante la recursión del algoritmo.
+    unsigned int m = nextPowerOfTwo(n);
+
+    
+    //inicialización de matrices auxiliares
+    vector<int> inner(m); //vector de tamaño m
+    vector<vector<int>> APrep(m, inner), BPrep(m, inner), CPrep(m, inner); //matrices m*m
+
+    //copiar las matrices originales a las matrices expandidas:
+    for (unsigned int i = 0; i < n; i++) {
+        for (unsigned int j = 0; j < n; j++) {
+            APrep[i][j] = A[i][j];
+            BPrep[i][j] = B[i][j];
+        }
+    }
+
+    //llamada recursiva al algoritmo de Strassen
+    strassenR(APrep, BPrep, CPrep, m); //resultado se guarda eb CPrep
+
+    //copiar el resultado de vuelta a la matriz original
+    //el resultado está almacenado en CPrep, se copian los valores relevantes (dentro de la región original de tamaño n×n) a la matriz C
+    for (unsigned int i = 0; i < n; i++) {
+        for (unsigned int j = 0; j < n; j++) {
+            C[i][j] = CPrep[i][j];
+        }
+    }
+}
+
+
+
+//función para sumar 2 matrices, se utiliza en strassenR
+void suma(vector<vector<int>>& A, vector<vector<int>>& B, vector<vector<int>>& C, int tam) {
+    for (int i = 0; i < tam; i++) {
+        for (int j = 0; j < tam; j++) {
+            C[i][j] = A[i][j] + B[i][j];
+        }
+    }
+}
+
+//función para restar 2 matrices, se utiliza en strassenR
+void resta(vector<vector<int>>& A, vector<vector<int>>& B, vector<vector<int>>& C, int tam) {
+    for (int i = 0; i < tam; i++) {
+        for (int j = 0; j < tam; j++) {
+            C[i][j] = A[i][j] - B[i][j];
+        }
+    }
+}
+
+
+
+//función para leer el archivo de las matrices
+void leer(string filename, vector<vector<int>>& A, vector<vector<int>>& B) {
+    string line;
+    ifstream matrixfile(filename);
+    if (!matrixfile.is_open()) {
+        cerr << "No se pudo leer el archivo " << filename << endl;
+        return;
+    }
+
+    int i = 0, j, a;
+    while (getline(matrixfile, line) && !line.empty()) {
+        istringstream iss(line);
+        j = 0;
+        while (iss >> a) {
+            A[i][j] = a;
+            j++;
+        }
+        i++;
+    }
+
+    i = 0;
+    while (getline(matrixfile, line)) {
+        istringstream iss(line);
+        j = 0;
+        while (iss >> a) {
+            B[i][j] = a;
+            j++;
+        }
+        i++;
+    }
+}
+
+//funcion para hacer un print por consola una matriz
+void printMatrix(const vector<vector<int>>& matrix, int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (j != 0) {
+                cout << "\t";
+            }
+            cout << matrix[i][j];
         }
         cout << endl;
     }
 }
 
-int main() {
-    //leer los archivos de las matrices
-    vector<vector<int>> matriz_1 = leer_matriz("datasets/matriz_1.txt");
-    vector<vector<int>> matriz_2 = leer_matriz("datasets/matriz_2.txt");
 
-    int filas_A = matriz_1.size();
-    int columnas_A = matriz_1[0].size();
-    int filas_B = matriz_2.size();
-    int columnas_B = matriz_2[0].size();
-
-    if (columnas_A != filas_B) {
-        cerr << "Las dimensiones no compatibles para multiplicación." << endl;
-        return 1;
+//función que exporta los datos la matrix a un archivo .txt
+void exportar_matriz(const vector<vector<int>>& matriz, const string& nombre_archivo) {
+    ofstream archivo(nombre_archivo);
+    if (!archivo.is_open()) {
+        cerr << "Error al abrir el archivo para exportar la matriz." << endl;
+        return;
     }
 
-	//se ajustan las matrices a la siguiente potencia de 2 (rellenar con ceros)
-    vector<vector<int>> matriz_1_ajustada = ajustar_matriz(matriz_1);
-    vector<vector<int>> matriz_2_ajustada = ajustar_matriz(matriz_2);
+    for (const auto& fila : matriz) {
+        for (const auto& elemento : fila) {
+            archivo << elemento << " ";
+        }
+        archivo << endl;
+    }
+
+    archivo.close();
+}
+
+
+
+
+int main() {
+    //unsigned int n = 1000;  // definir el tamaño de las matrices
+
+    //leer los archivos de las matrices
+    vector<vector<int>> A = leer_matriz("datasets/matriz_1.txt");
+    vector<vector<int>> B = leer_matriz("datasets/matriz_2.txt");
+
+    int filas_A = A.size();
+    int n = filas_A;
+    //crear la matriz C para almacenar el resultado
+    vector<vector<int>> C(n, vector<int>(n));
+
 
     auto start = chrono::high_resolution_clock::now();
-    vector<vector<int>> producto = multiply_matrix(matriz_1_ajustada, matriz_2_ajustada);
+    strassen(A, B, C, n); // ejecutar el algoritmo de Strassen
     auto end = chrono::high_resolution_clock::now();
+
 
     chrono::duration<double, milli> elapsed = end - start;
     cout << "Time: " << elapsed.count() << " ms" << endl;
+    //printMatrix(C, n);
 
 
-    //Print
-    cout << "Matriz 1" << endl;
-    //imprimir_matriz(matriz_1);
-    cout << endl;
-
-    cout << "Matriz 2" << endl;
-    //imprimir_matriz(matriz_2);
-    cout << endl;
-
-    cout << "Producto" << endl;
-    //imprimir_matriz(producto);
-
+    // exportar la matriz resultante a un archivo .txt
+    exportar_matriz(C, "resultado_strassen.txt");
     return 0;
 }

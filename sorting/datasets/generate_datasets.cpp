@@ -5,14 +5,17 @@
 #include <ctime>
 #include <fstream>
 #include <set>
-#include <filesystem>
 #include <random> //para std::shuffle
 
 using namespace std;
-namespace fs = std::filesystem;
 
-int nums = 1000; //cantidad de los numeros a generar
-int nums_size = 1000; //tamaño de cada numero generado
+//---------------------- PARÁMETROS ----------------------#
+int nums = 100000; //cantidad de los numeros a generar
+int nums_size = 600000; //maximo tamaño de cada numero generado 
+//!!importante nums_size >nums, debido a la funcion que genera numeros unicos
+//de lo contrario solo generará un numero 0
+//--------------------------------------------------------#
+
 
 
 //funcion para generar el dataset de numeros random
@@ -28,6 +31,13 @@ vector<int> gen_random_dataset(int size) {
 vector<int> gen_semisorted_dataset(int size) {
     vector<int> data = gen_random_dataset(size);
     sort(data.begin(), data.begin() + size / 2); //ordenar la primera mitad del inicio
+    return data;
+}
+
+//funcion para generar un dataset de numeros random y ordenarlos
+vector<int> gen_sorted_random_dataset(int size) {
+    vector<int> data = gen_random_dataset(size);
+    sort(data.begin(), data.end()); //ordenar el dataset completamente
     return data;
 }
 
@@ -55,6 +65,12 @@ vector<int> gen_partially_sorted_dataset(int size, float percentage) {
 
 //esta funcion genera un dataset de numeros unicos usando un set; donde no se pueden repetir los nums
 vector<int> gen_unique_random_dataset(int size) {
+
+    if(nums > nums_size){
+        cout << "ERROR: nums debe ser mayor que nums_size para generar numeros unicos" << endl;
+        vector<int> error = {0};
+        return error;
+    }
     set<int> unique_numbers;
     vector<int> data;
 
@@ -75,23 +91,16 @@ vector<int> gen_unique_random_dataset(int size) {
 
 //funcion que solo crea los archivos .txt de los datasets
 void dataset_to_file(const vector<int>& dataset, const string& filename) {
-    fs::path dir = "datasets";
-    if (!fs::exists(dir)) {
-        fs::create_directory(dir); // Crear la carpeta si no existe
-    }
-
-    fs::path filepath = dir / filename;
-    ofstream file(filepath);
+    ofstream file(filename);
     if (file.is_open()) {
         for (int val : dataset) {
             file << val << " "; 
         }
         file.close();
     } else {
-        cerr << "Error al crear el archivo: " << filepath << endl;
+        cerr << "Error al crear el archivo: " << filename << endl;
     }
 }
-
 
 int main() {
     srand(time(0)); // inicializar el random con el tiempo
@@ -99,12 +108,14 @@ int main() {
     //crear los vectores con lso numeros "aleatorios"
     vector<int> dataset_random = gen_random_dataset(nums);
     vector<int> dataset_semi_sorted = gen_semisorted_dataset(nums); //50% (la mitad) ordenado desde el inicio
+    vector<int> dataset_sorted_random = gen_sorted_random_dataset(nums); // dataset completamente ordenado
 
     float percentage = 70.0; //porcentaje de elementos a ordenar
     vector<int> dataset_partially_sorted = gen_partially_sorted_dataset(nums, percentage); // 70% de n ordenado al medio
     vector<int> dataset_unique_random = gen_unique_random_dataset(nums);
 
     //crear los .txt de los dataset
+    dataset_to_file(dataset_sorted_random, "sorted_random_dataset.txt");
     dataset_to_file(dataset_random, "random_dataset.txt");
     dataset_to_file(dataset_semi_sorted, "semisorted_dataset.txt");
     dataset_to_file(dataset_partially_sorted, "partially_sorted_dataset.txt");

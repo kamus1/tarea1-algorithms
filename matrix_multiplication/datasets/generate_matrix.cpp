@@ -3,10 +3,8 @@
 #include <cstdlib> 
 #include <ctime>  
 #include <fstream>
-#include <filesystem> //std::filesystem
 
 using namespace std;
-namespace fs = std::filesystem;
 
 //funcion que genera una matriz de números random
 vector<vector<int>> generar_matriz(int filas, int columnas, int rango_min, int rango_max) {
@@ -24,13 +22,7 @@ vector<vector<int>> generar_matriz(int filas, int columnas, int rango_min, int r
 
 //función para guardar la matriz en un archivo
 void guardar_matriz_en_archivo(const vector<vector<int>>& matriz, const string& nombre_archivo) {
-    fs::path dir = "datasets";
-    if (!fs::exists(dir)) {
-        fs::create_directory(dir); //crear la carpeta si no existe
-    }
-
-    fs::path filepath = dir / nombre_archivo;
-    ofstream archivo(filepath);
+    ofstream archivo(nombre_archivo);
     if (archivo.is_open()) {
         for (const auto& fila : matriz) {
             for (int valor : fila) {
@@ -40,35 +32,36 @@ void guardar_matriz_en_archivo(const vector<vector<int>>& matriz, const string& 
         }
         archivo.close();
     } else {
-        cerr << "Error al crear el archivo: " << filepath << endl;
+        cerr << "Error al crear el archivo: " << nombre_archivo << endl;
     }
 }
 
 int main() {
     srand(time(0));
 
+    //------------------------PARÁMETROS--------------------------//
     //parámetros de la matriz 1
-    int filas = 200;
-    int columnas = 200;
+    int filas = 4;
+    int columnas = 4;
     int rango_min = 1;
     int rango_max = 10;
     string nombre_archivo_1 = "matriz_1.txt";
+
+    //parámetros de la matriz 2
+    int filas_2 = 4;
+    int columnas_2 = 4;
+    int rango_min_2 = 1;
+    int rango_max_2 = 10;
+    string nombre_archivo_2 = "matriz_2.txt";
+    //------------------------------------------------------------//
 
 
     //gen matriz 1
     auto matriz = generar_matriz(filas, columnas, rango_min, rango_max);
     guardar_matriz_en_archivo(matriz, nombre_archivo_1);
 
-
-    //parámetros de la matriz 2
-    filas = 200;
-    columnas = 200;
-    rango_min = 1;
-    rango_max = 10;
-    string nombre_archivo_2 = "matriz_2.txt";
-
     //gen matriz 2
-    auto matriz_2 = generar_matriz(filas, columnas, rango_min, rango_max);
+    auto matriz_2 = generar_matriz(filas_2, columnas_2, rango_min_2, rango_max_2);
     guardar_matriz_en_archivo(matriz_2, nombre_archivo_2);
 
     
