@@ -41,15 +41,15 @@ int main() {
 
     //------------------------PARÁMETROS--------------------------//
     //parámetros de la matriz 1
-    int filas = 3000;
-    int columnas = 3000;
+    int filas = 4;
+    int columnas = 4;
     int rango_min = 1;
-    int rango_max = 1000;
+    int rango_max = 100;
     string nombre_archivo_1 = "matriz_1.txt";
 
     //parámetros de la matriz 2
-    int filas_2 = 3000;
-    int columnas_2 = 3000;
+    int filas_2 = 4;
+    int columnas_2 = 4;
     int rango_min_2 = 1;
     int rango_max_2 = 1000;
     string nombre_archivo_2 = "matriz_2.txt";

@@ -8,7 +8,7 @@
 using namespace std;
 
 //---------Tamaño de las hojas---------//
-int leafsize = 32;
+int leafsize = 1; 
 //-------------------------------------//
 
 //funcion que lee las matrices de los archivos .txt 
@@ -128,35 +128,35 @@ void strassenR(vector<vector<int>>& A, vector<vector<int>>& B, vector<vector<int
 
         // llama recursivamente a strassenR para multiplicar las sumas obtenidas en los pasos anteriores, es decir:
         //P1 = (A11 + A22) * (B11 + B22) Y almacena el resultado en P1
-        strassenR(aResult, bResult, P1, newTam); 
+        strassenR(aResult, bResult, P1, newTam);  // 1° llamada recursiva
         //---------------------------------------//
         
         //mismo procedimiento para los demas productos intermedios:
         //----------------P2---------------------//
         suma(A21, A22, aResult, newTam); 
         //P2 =(A21 + A22) * B11
-        strassenR(aResult, B11, P2, newTam);
+        strassenR(aResult, B11, P2, newTam);// 2° llamada recursiva
         //---------------------------------------//
 
 
         //----------------P3---------------------//
         resta(B12, B22, bResult, newTam); // B12 - B22
         // P3 = A11 * (B12 - B22)
-        strassenR(A11, bResult, P3, newTam);
+        strassenR(A11, bResult, P3, newTam);// 3° llamada recursiva
         //---------------------------------------//
         
 
         //----------------P4---------------------//
         resta(B21, B11, bResult, newTam);
         // P4 = A22 * (B21 - B11)
-        strassenR(A22, bResult, P4, newTam);
+        strassenR(A22, bResult, P4, newTam);// 4° llamada recursiva
         //---------------------------------------//
 
 
         //----------------P5---------------------//
         suma(A11, A12, aResult, newTam);
         //P5 = (A11 + A12) * B22
-        strassenR(aResult, B22, P5, newTam);
+        strassenR(aResult, B22, P5, newTam);// 5° llamada recursiva
         //---------------------------------------//
 
 
@@ -164,7 +164,7 @@ void strassenR(vector<vector<int>>& A, vector<vector<int>>& B, vector<vector<int
         resta(A21, A11, aResult, newTam);
         suma(B11, B12, bResult, newTam);
         //P6 =(A21 - A11) * (B11 + B12)
-        strassenR(aResult, bResult, P6, newTam);
+        strassenR(aResult, bResult, P6, newTam);// 6° llamada recursiva
         //---------------------------------------//
 
 
@@ -172,7 +172,7 @@ void strassenR(vector<vector<int>>& A, vector<vector<int>>& B, vector<vector<int
         resta(A12, A22, aResult, newTam);
         suma(B21, B22, bResult, newTam);
         //P7 = (A12 - A22) * (B21 + B22)
-        strassenR(aResult, bResult, P7, newTam);
+        strassenR(aResult, bResult, P7, newTam);// 7° llamada recursiva -> ahí están las 7 llamadas recursivas del método de strassen.
         //---------------------------------------//
 
 

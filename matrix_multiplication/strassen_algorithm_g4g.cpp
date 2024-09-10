@@ -82,6 +82,7 @@ multiply_matrix(
     vector<vector<int> > matrix_B
 	)
 {
+    //obtener dimensiones de las matrices A y B
     int col_1 = matrix_A[0].size();
     int row_1 = matrix_A.size();
     int col_2 = matrix_B[0].size();
@@ -91,18 +92,21 @@ multiply_matrix(
 		cout << "ERROR: El numero de las columas en la matriz A debe de ser igual al numero de filas en la matriz b" << endl;
         return {};
     }
- 
+    //inicializar la matriz resultado con ceros (tamaño resultante: filas de A x columnas de B)
     vector<int> result_matrix_row(col_2, 0);
     vector<vector<int> > result_matrix(row_1,result_matrix_row);
  
-    if (col_1 == 1)
+    if (col_1 == 1) // caso base
         result_matrix[0][0]
             = matrix_A[0][0] * matrix_B[0][0];
     else {
+        //dividir las matrices en submatrices más pequeñas
         int split_index = col_1 / 2;
- 
+
+        //inicializar submatrices A y B de tamaño split_index x split_index
         vector<int> row_vector(split_index, 0);
- 
+
+        //dividir las matrices A y B en cuatro submatrices cada una
         vector<vector<int> > a00(split_index, row_vector);
         vector<vector<int> > a01(split_index, row_vector);
         vector<vector<int> > a10(split_index, row_vector);
@@ -112,13 +116,17 @@ multiply_matrix(
         vector<vector<int> > b10(split_index, row_vector);
         vector<vector<int> > b11(split_index, row_vector);
  
+
+        //rellenar las submatrices con los valores correspondientes de las matrices A y B
         for (auto i = 0; i < split_index; i++)
             for (auto j = 0; j < split_index; j++) {
+                //llenar las submatrices de A
                 a00[i][j] = matrix_A[i][j];
                 a01[i][j] = matrix_A[i][j + split_index];
                 a10[i][j] = matrix_A[split_index + i][j];
                 a11[i][j] = matrix_A[i + split_index]
                                     [j + split_index];
+                //llenar las submatrices de B                   
                 b00[i][j] = matrix_B[i][j];
                 b01[i][j] = matrix_B[i][j + split_index];
                 b10[i][j] = matrix_B[split_index + i][j];
@@ -126,6 +134,7 @@ multiply_matrix(
                                     [j + split_index];
             }
  
+  //realizar las multiplicaciones y sumas intermedias necesarias para la combinación final
         vector<vector<int> > p(multiply_matrix(
             a00, add_matrix(b01, b11, split_index, -1)));
         vector<vector<int> > q(multiply_matrix(
@@ -144,6 +153,7 @@ multiply_matrix(
             add_matrix(a00, a10, split_index, -1),
             add_matrix(b00, b01, split_index)));
  
+        //combinar los resultados para formar las submatrices de la matriz resultado
         vector<vector<int> > result_matrix_00(add_matrix(
             add_matrix(add_matrix(t, s, split_index), u,
                        split_index),
@@ -157,6 +167,7 @@ multiply_matrix(
                        split_index, -1),
             v, split_index, -1));
  
+        //unir las submatrices para formar la matriz resultado completa
         for (auto i = 0; i < split_index; i++)
             for (auto j = 0; j < split_index; j++) {
                 result_matrix[i][j]
@@ -169,7 +180,7 @@ multiply_matrix(
                              [j + split_index]
                     = result_matrix_11[i][j];
             }
- 
+        //limpiar la memoria de las submatrices temporales
         a00.clear();
         a01.clear();
         a10.clear();
