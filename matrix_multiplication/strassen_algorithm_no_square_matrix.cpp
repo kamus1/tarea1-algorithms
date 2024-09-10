@@ -8,7 +8,7 @@
 using namespace std;
 
 //---------Tamaño de las hojas---------//
-int leafsize = 64;
+int leafsize = 1;
 //-------------------------------------//
 
 //funcion que lee las matrices de los archivos .txt 
