@@ -13,7 +13,6 @@ using namespace std;
 int nums = 10; //cantidad de los numeros a generar
 int nums_size = 600000; //maximo tamaño de cada numero generado 
 //!!importante nums_size >nums, debido a la funcion que genera numeros unicos
-//de lo contrario solo generará un numero 0
 //--------------------------------------------------------#
 
 
