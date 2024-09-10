@@ -66,7 +66,7 @@ int main(){
 
 
 
-        // Escribir los valores ordenados en el archivo s_bubble_sort.txt
+        // exportar los valores ordenados en el archivo s_bubble_sort.txt
         archivo_salida << "Time: " << elapsed.count() << " ms" << " | File: " << nombreArchivo << endl;
         for (const int& e : listado) {
             archivo_salida << e << ' ';

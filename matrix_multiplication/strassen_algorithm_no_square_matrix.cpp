@@ -8,7 +8,7 @@
 using namespace std;
 
 //---------Tamaño de las hojas---------//
-int leafsize = 32;
+int leafsize = 64;
 //-------------------------------------//
 
 //funcion que lee las matrices de los archivos .txt 
@@ -61,10 +61,11 @@ void ikjalgorithm(const vector<vector<int>>& A, const vector<vector<int>>& B, ve
 //la funcion recursiva de strassen: divide las matrices A y B en submatrices de tamaño reducido A11, A12, ...
 void strassenR(vector<vector<int>>& A, vector<vector<int>>& B, vector<vector<int>>& C, int tam) {
     
+    
     if(tam == 1){
         C[0][0] += A[0][0] * B[0][0];
         return;
-    } else if (tam <= leafsize) {
+    } else if  (tam <= leafsize) {
         //primero se verifica el tamaño de las hojas para ejecutar el algortimo ikj
         ikjalgorithm(A, B, C, tam);
         return;
@@ -340,11 +341,41 @@ void exportar_matriz(const vector<vector<int>>& matriz, const string& nombre_arc
 }
 
 
+//función para rellenar matrices con ceros hasta que sean del mismo tamaño
+void rellenarMatrices(vector<vector<int>>& A, vector<vector<int>>& B) {
+    // buscar el número máximo de filas y columnas entre las dos matrices
+    int maxFilas = max(A.size(), B.size());
+    int maxColumnas = max(A[0].size(), B[0].size());
 
+    //rellenar la matriz A con ceros
+    for (auto& fila : A) {
+        fila.resize(maxColumnas, 0);//ajustar el número de columnas
+    }
+    while (A.size() < maxFilas) {
+        A.push_back(vector<int>(maxColumnas, 0));//agregar filas de ceros
+    }
+
+    //rellenar la matriz B con ceros
+    for (auto& fila : B) {
+        fila.resize(maxColumnas, 0);  
+    }
+    while (B.size() < maxFilas) {
+        B.push_back(vector<int>(maxColumnas, 0)); 
+    }
+}
+
+void ajustarTamañoMatriz(vector<vector<int>>& C, int filas_A, int columnas_B) {
+    // Ajustar el tamaño de la matriz C para que coincida con las dimensiones originales
+    // Reducir el número de filas si es necesario
+    C.resize(filas_A);
+
+    // Reducir el número de columnas en cada fila si es necesario
+    for (auto& fila : C) {
+        fila.resize(columnas_B);
+    }
+}
 
 int main() {
-    //unsigned int n = 1000;  // definir el tamaño de las matrices
-
     //leer los archivos de las matrices
     vector<vector<int>> A = leer_matriz("datasets/matriz_1.txt");
     vector<vector<int>> B = leer_matriz("datasets/matriz_2.txt");
@@ -354,13 +385,11 @@ int main() {
 
     int columnas_A =A[0].size();
     int filas_B = B.size();
+    int columnas_B = B[0].size();
     if(columnas_A != filas_B || filas_A != filas_B){
-        cout << "Matrices no son cuadradas: usar /strassen_algorithm_no_square_matrix.cpp" << endl;
-        return 0;
+        rellenarMatrices(A, B);
     }
-    //crear la matriz C para almacenar el resultado
     vector<vector<int>> C(n, vector<int>(n));
-
 
     auto start = chrono::high_resolution_clock::now();
     strassen(A, B, C, n); // ejecutar el algoritmo de Strassen
@@ -369,10 +398,12 @@ int main() {
 
     chrono::duration<double, milli> elapsed = end - start;
     cout << "Time: " << elapsed.count() << " ms" << endl;
-    //printMatrix(C, n);
 
+    //ajustar tamaño de la matriz C al tamaño correcto antes de exportar
+    //ya que podria contener valores de 0
+    ajustarTamañoMatriz(C, filas_A, columnas_B);
 
     // exportar la matriz resultante a un archivo .txt
-    exportar_matriz(C, "res_strassen.txt");
+    exportar_matriz(C, "res_strassen_no_square.txt");
     return 0;
 }

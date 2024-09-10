@@ -65,6 +65,24 @@ void imprimir_matriz(const vector<vector<int>>& matriz) {
     }
 }
 
+
+void exportar_matriz(const vector<vector<int>>& matriz, const string& nombre_archivo) {
+    ofstream archivo(nombre_archivo);
+    if (!archivo.is_open()) {
+        cerr << "Error al abrir el archivo para exportar la matriz." << endl;
+        return;
+    }
+
+    for (const auto& fila : matriz) {
+        for (const auto& elemento : fila) {
+            archivo << elemento << " ";
+        }
+        archivo << endl;
+    }
+
+    archivo.close();
+}
+
 int main() {
     //leer los archivos de las matrices
     vector<vector<int>> matriz_1 = leer_matriz("datasets/matriz_1.txt");
@@ -90,16 +108,18 @@ int main() {
 
 
     //Print
-    cout << "Matriz 1" << endl;
+    //cout << "Matriz 1" << endl;
     //imprimir_matriz(matriz_1);
-    cout << endl;
+    //cout << endl;
 
-    cout << "Matriz 2" << endl;
+    //cout << "Matriz 2" << endl;
     //imprimir_matriz(matriz_2);
-    cout << endl;
+    //cout << endl;
 
-    cout << "Producto" << endl;
+    //cout << "Producto" << endl;
     //imprimir_matriz(producto);
 
+    // Exportar la matriz resultante a un archivo .txt
+    exportar_matriz(producto, "res_cubic_traditional.txt");
     return 0;
 }
