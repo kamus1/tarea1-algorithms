@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/1cc6707e-127b-47a6-b249-92fd2ae6b16a)# Tarea 1 Algoritmos Dividir y Conquistar
+# Tarea 1 Algoritmos Dividir y Conquistar
 Benjamín Camus Valdés
 202173072-9
 
@@ -15,7 +15,8 @@ Se pueden especificar los siguientes parámetros:
 Una vez generados los datasets, se pueden ejecutar los archivos de los algoritmos correspondientes. Cada resultado será exportado en un archivo .txt:
 
 
-Algoritmos de ordenamiento
+Algoritmos de ordenamiento:
+
  • s_bubble sort.txt: Datos ordenados (sorted) luego de usar Bubble Sort.
  
  • s_selection sort.txt: Datos ordenados luego de usar Selection Sort.
