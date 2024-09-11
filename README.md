@@ -1,4 +1,5 @@
-# Tarea 1 Algoritmos Dividir y Conquistar
+# Tarea 1 Algoritmos y complejidad
+# Algoritmos Dividir y Conquistar
 Benjamín Camus Valdés
 202173072-9
 
